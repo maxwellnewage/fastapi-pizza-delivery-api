@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import Optional
-from jose import jwt
 
 
 class SignUpModel(BaseModel):

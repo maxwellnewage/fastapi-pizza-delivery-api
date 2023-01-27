@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from jose import jwt
 
 
 class SignUpModel(BaseModel):
@@ -21,3 +22,8 @@ class SignUpModel(BaseModel):
                 "is_active": True
             }
         }
+
+
+class LoginModel(BaseModel):
+    username: str
+    password: str

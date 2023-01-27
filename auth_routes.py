@@ -3,7 +3,6 @@ from database import Session, engine
 from schemas import SignUpModel, LoginModel
 from models import User
 from fastapi.exceptions import HTTPException
-from werkzeug.security import generate_password_hash, check_password_hash
 from jose import jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
@@ -20,6 +19,14 @@ auth_router = APIRouter(
 )
 
 session = Session(bind=engine)
+
+
+def verify_password(plain_password, hashed_password):
+    return crypt.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password):
+    return crypt.hash(password)
 
 
 @auth_router.get('/')
@@ -40,7 +47,7 @@ async def signup(user: SignUpModel):
     new_user = User(
         username=user.username,
         email=user.email,
-        password= generate_password_hash(user.password),
+        password=get_password_hash(user.password),
         is_active=user.is_active,
         is_staff=user.is_staff,
     )
@@ -55,7 +62,7 @@ async def signup(user: SignUpModel):
 async def login(user: LoginModel):
     db_user = session.query(User).filter(User.username == user.username).first()
 
-    if db_user and check_password_hash(db_user.password, user.password):
+    if db_user and verify_password(user.password, db_user.password):
         access_token = {
             "sub": db_user.username,
             "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_DURATION)

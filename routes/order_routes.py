@@ -35,7 +35,7 @@ async def get_all_orders(token: str = Depends(oauth2_scheme)):
         return orders
 
 
-@order_router.post('/order', status_code=status.HTTP_201_CREATED)
+@order_router.post('/place', status_code=status.HTTP_201_CREATED)
 async def place_an_order(order: OrderModel, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
 
@@ -59,9 +59,29 @@ async def place_an_order(order: OrderModel, token: str = Depends(oauth2_scheme))
     return jsonable_encoder(response)
 
 
-@order_router.get('/{id}')
-async def get_order_by_id(id: int, token: str = Depends(oauth2_scheme)):
+@order_router.get('/{order_id}')
+async def get_order(order_id: int, token: str = Depends(oauth2_scheme)):
     user = get_user(token)
 
     if is_admin(user):
-        return session.query(Order).filter(Order.id == id).first()
+        return session.query(Order).filter(Order.id == order_id).first()
+
+
+@order_router.get('/user/all')
+async def get_user_orders(token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
+
+    return session.query(User).filter(User.username == user.username).first().orders
+
+
+@order_router.put('/{order_id}')
+async def update_order(order_id: int, order: OrderModel, token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
+    order_bd = session.query(Order).filter(Order.id == order_id and Order.user.username == user).first()
+
+    order_bd.quantity = order.quantity
+    order_bd.pizza_size = order.pizza_size
+
+    session.commit()
+
+    return jsonable_encoder(order_bd)

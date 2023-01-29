@@ -85,3 +85,11 @@ async def update_order(order_id: int, order: OrderModel, token: str = Depends(oa
     session.commit()
 
     return jsonable_encoder(order_bd)
+
+
+@order_router.delete('/{order_id}', status_code=status.HTTP_204_NO_CONTENT)
+async def delete_order(order_id: int, token: str = Depends(oauth2_scheme)):
+    user = get_user(token)
+    session.query(Order).filter(Order.id == order_id and Order.user.username == user).delete()
+
+    session.commit()

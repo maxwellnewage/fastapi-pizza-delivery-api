@@ -4,7 +4,7 @@ from database.globals import Session, engine
 from schemas import SignUpModel
 from models import User
 from fastapi.exceptions import HTTPException
-from auth_manager import get_access_token, crypt, oauth2_scheme, get_payload
+from auth_manager import get_access_token, crypt
 
 
 auth_router = APIRouter(

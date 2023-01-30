@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from database import Session, engine
+from database.globals import Session, engine
 from schemas import SignUpModel
 from models import User
 from fastapi.exceptions import HTTPException

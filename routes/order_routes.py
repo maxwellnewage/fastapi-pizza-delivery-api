@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from models import User, Order
 from schemas import OrderModel
 from auth_manager import oauth2_scheme, get_payload
-from database import Session, engine
+from database.globals import Session, engine
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 

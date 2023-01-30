@@ -15,15 +15,13 @@ auth_router = APIRouter(
 session = Session(bind=engine)
 
 
-@auth_router.get('/')
-async def hello(token: str = Depends(oauth2_scheme)):
-    user_payload = get_payload(token)
-
-    return {"message": f"Hello {user_payload}!, you are logged in."}
-
-
 @auth_router.post('/signup', response_model=SignUpModel, status_code=status.HTTP_201_CREATED)
 async def signup(user: SignUpModel):
+    """
+    Se registra un usuario nuevo, comprobando si existe en la BD
+    :param user:
+    :return: User
+    """
     db_username = session.query(User).filter(User.email == user.email or User.username == user.username).first()
 
     if db_username is not None:
@@ -48,6 +46,11 @@ async def signup(user: SignUpModel):
 
 @auth_router.post('/login')
 async def login(form: OAuth2PasswordRequestForm = Depends()):
+    """
+    Se autentica usuario y se genera un JWT
+    :param form:
+    :return: Json Web Token de User
+    """
     user = session.query(User).filter(User.username == form.username).first()
 
     if user and crypt.verify(form.password, user.password):

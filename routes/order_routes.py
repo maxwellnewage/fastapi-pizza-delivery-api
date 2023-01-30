@@ -15,11 +15,21 @@ session = Session(bind=engine)
 
 
 def get_user(token: str):
+    """
+    Obtiene usuario en base al token por oauth
+    :param token:
+    :return: User
+    """
     user_payload = get_payload(token)
     return session.query(User).filter(User.username == user_payload).first()
 
 
 def is_admin(user):
+    """
+    Comprueba si el usuario es administrador (is_staff == True)
+    :param user:
+    :return: True | HTTPException
+    """
     if user.is_staff:
         return True
     else:
@@ -28,6 +38,11 @@ def is_admin(user):
 
 @order_router.get('/')
 async def get_all_orders(token: str = Depends(oauth2_scheme)):
+    """
+    Obtiene todas las ordenes
+    :param token:
+    :return: List[Order]
+    """
     user = get_user(token)
 
     if is_admin(user):
@@ -35,8 +50,14 @@ async def get_all_orders(token: str = Depends(oauth2_scheme)):
         return orders
 
 
-@order_router.post('/place', status_code=status.HTTP_201_CREATED)
+@order_router.post('/', status_code=status.HTTP_201_CREATED)
 async def place_an_order(order: OrderModel, token: str = Depends(oauth2_scheme)):
+    """
+    Crea una orden nueva y la retorna
+    :param order:
+    :param token:
+    :return: Order
+    """
     user = get_user(token)
 
     new_order = Order(
@@ -61,6 +82,12 @@ async def place_an_order(order: OrderModel, token: str = Depends(oauth2_scheme))
 
 @order_router.get('/{order_id}')
 async def get_order(order_id: int, token: str = Depends(oauth2_scheme)):
+    """
+    Obtiene una orden según el Id
+    :param order_id:
+    :param token:
+    :return: Order
+    """
     user = get_user(token)
 
     if is_admin(user):
@@ -69,6 +96,11 @@ async def get_order(order_id: int, token: str = Depends(oauth2_scheme)):
 
 @order_router.get('/user/all')
 async def get_user_orders(token: str = Depends(oauth2_scheme)):
+    """
+    Obtiene las órdenes que hizo el usuario autenticado
+    :param token:
+    :return: List[Order]
+    """
     user = get_user(token)
 
     return session.query(User).filter(User.username == user.username).first().orders
@@ -76,6 +108,13 @@ async def get_user_orders(token: str = Depends(oauth2_scheme)):
 
 @order_router.put('/{order_id}')
 async def update_order(order_id: int, order: OrderModel, token: str = Depends(oauth2_scheme)):
+    """
+    Actualiza una orden existente
+    :param order_id:
+    :param order:
+    :param token:
+    :return: Order
+    """
     user = get_user(token)
     order_bd = session.query(Order).filter(Order.id == order_id and Order.user.username == user).first()
 
@@ -89,6 +128,12 @@ async def update_order(order_id: int, order: OrderModel, token: str = Depends(oa
 
 @order_router.delete('/{order_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_order(order_id: int, token: str = Depends(oauth2_scheme)):
+    """
+    Elimina una orden
+    :param order_id:
+    :param token:
+    :return: None
+    """
     user = get_user(token)
     session.query(Order).filter(Order.id == order_id and Order.user.username == user).delete()
 
